@@ -11,7 +11,7 @@ const app = express();
 // CORS configuration for production
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.onrender.com'] // Update this with your frontend URL
+    ? ['https://todo-list-frontend-xv35.onrender.com'] // Update this with your frontend URL
     : ['http://localhost:3000'],
   credentials: true
 };
