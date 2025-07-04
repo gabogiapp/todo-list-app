@@ -1,0 +1,3 @@
+Todo based app
+Run backend: under server npm start dev
+run frontend: under client npm start
