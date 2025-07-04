@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const API_URL = 'https://todo-list-backend-9ok9.onrender.com/api/todos';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
+
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   useEffect(() => {
     fetch(API_URL)
@@ -117,6 +120,15 @@ function App() {
             {todos.length > 0 && (
               <div className="todo-stats">
                 <span>{todos.filter(t => t.completed).length} of {todos.length} completed</span>
+              </div>
+            )}
+
+            {!isAuthenticated ? (
+              <button onClick={() => loginWithRedirect()}>Log In</button>
+            ) : (
+              <div>
+                <span>Welcome, {user.name}!</span>
+                <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>Log Out</button>
               </div>
             )}
           </div>

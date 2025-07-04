@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { expressjwt } from "express-jwt";
+import jwksRsa from "jwks-rsa";
 import todoRoutes from './routes/todos.js';
 
 dotenv.config();
@@ -24,7 +26,24 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/todos', todoRoutes);
+const authConfig = {
+  domain: "dev-b3ffiws1o2tkxufg.us.auth0.com",
+  audience: "todo-list-auth-api",
+};
+const checkJwt = expressjwt({
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://${authConfig.domain}/.well-known/jwks.json`
+  }),
+  audience: authConfig.audience,
+  issuer: `https://${authConfig.domain}/`,
+  algorithms: ["RS256"]
+});
+
+// Protect all /api/todos routes
+app.use('/api/todos', checkJwt, todoRoutes);
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
