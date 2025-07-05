@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import { useAuth0 } from "@auth0/auth0-react";
+import LoginPage from "./LoginPage";
 
 const API_URL = 'https://todo-list-backend-9ok9.onrender.com/api/todos';
 
@@ -8,7 +9,7 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
 
-  const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently, isLoading } = useAuth0();
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -67,6 +68,10 @@ function App() {
       addTodo();
     }
   };
+
+  if (!isAuthenticated && !isLoading) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="app">
