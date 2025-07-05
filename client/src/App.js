@@ -8,19 +8,30 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
 
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(setTodos);
-  }, []);
+    const fetchTodos = async () => {
+      if (!isAuthenticated) return;
+      const token = await getAccessTokenSilently();
+      const res = await fetch(API_URL, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setTodos(data);
+    };
+    fetchTodos();
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   const addTodo = async () => {
     if (!text.trim()) return;
+    const token = await getAccessTokenSilently();
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ text })
     });
     const todo = await res.json();
@@ -29,9 +40,13 @@ function App() {
   };
 
   const toggleTodo = async (id, completed) => {
+    const token = await getAccessTokenSilently();
     const res = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ completed: !completed })
     });
     const updated = await res.json();
@@ -39,7 +54,11 @@ function App() {
   };
 
   const deleteTodo = async (id) => {
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    const token = await getAccessTokenSilently();
+    await fetch(`${API_URL}/${id}`, { 
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     setTodos(todos.filter(t => t._id !== id));
   };
 
